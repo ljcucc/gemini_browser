@@ -1,14 +1,23 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:gemini_browser/gemini/gemini_browser_view.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
+import 'package:gemini_browser/providers/sidebar_controller.dart';
+import 'package:gemini_browser/providers/tab_list_controller.dart';
+import 'package:gemini_browser/widgets/collapsible_sidebar.dart';
+import 'package:gemini_browser/widgets/topbar.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 
-import 'package:gemini_browser/gemini/gemtext/gemtext_disp_widget.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (!(Platform.isIOS || Platform.isAndroid)) {
+    await windowManager.ensureInitialized();
+    windowManager.setTitle("");
+  }
+
   runApp(const MyApp());
 }
 
@@ -18,9 +27,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    if (!(Platform.isIOS || Platform.isAndroid)) {
+      windowManager.setTitle("New page");
+    }
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GeminiConnectionProvider()),
+        ChangeNotifierProvider(create: (_) => SidebarController()),
+        ChangeNotifierProvider(create: (_) => TabListController()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -46,90 +60,40 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  ColorScheme? customColorScheme;
-  @override
-  void initState() {
-    super.initState();
-
-    _urlInput.text = "gemini://geminispace.info/search?uxn";
-  }
-
-  TextEditingController _urlInput = TextEditingController(text: "");
-
-  _sendGeminiRequest() async {
-    print("openning request");
-    final gcp = Provider.of<GeminiConnectionProvider>(context, listen: false);
-    final connection = gcp.connection;
-    final text = _urlInput.text;
-    var url = (text.contains(" ") || !text.contains("."))
-        ? connection.searchResolve(text)
-        : connection.resolve(text);
-
-    await gcp.stream(url);
-
-    final customColor =
-        gcp.connection.uri.host.toString().hashCode & 0xFFFFFFFF;
-
-    setState(() {
-      customColorScheme = ColorScheme.fromSeed(
-        brightness: MediaQuery.of(context).platformBrightness,
-        seedColor: Color(customColor),
-      );
-    });
-
-    print("color changed");
-  }
-
   @override
   Widget build(BuildContext context) {
-    final moreMenu = PopupMenuButton(itemBuilder: (_) => []);
-    final gcp = Provider.of<GeminiConnectionProvider>(context);
-    final colorScheme = customColorScheme ?? Theme.of(context).colorScheme;
+    const body = GeminiBrowserView();
 
-    return Theme(
-      data: ThemeData(
-        colorScheme: colorScheme,
-      ),
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          surfaceTintColor: Colors.transparent,
-          // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          leading: IconButton(
-            onPressed: () {
-              gcp.pop();
-            },
-            icon: Icon(Icons.arrow_back),
-            padding: EdgeInsets.all(8),
-          ),
-          title: Consumer<GeminiConnectionProvider>(builder: (context, gcp, _) {
-            _urlInput.text = gcp.connection.uri.toString();
-            return TextField(
-              // textAlign: TextAlign.center,
-              controller: _urlInput,
-              decoration: InputDecoration(border: InputBorder.none),
-              onSubmitted: (_) => _sendGeminiRequest(),
-            );
-          }),
-          actions: [
-            IconButton(
-              onPressed: _sendGeminiRequest,
-              icon: const Icon(Icons.search_rounded),
+    divider() => Divider(
+          height: 1,
+          indent: 0,
+          endIndent: 0,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        );
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: SafeArea(
+        child: Column(
+          children: [
+            divider(),
+            const Expanded(
+              child: Row(
+                children: [
+                  CollapsibleSidebarView(),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TopbarWidget(),
+                        Expanded(child: body),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Divider(
-              height: 1,
-              endIndent: 0,
-              indent: 0,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            Expanded(
-              child: GeminiBrowserView(),
-            ),
+            divider(),
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
 import 'package:gemini_browser/gemini/gemtext/link_image_disp_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,7 +27,10 @@ class ParagraphLine extends GemtextLine {
 
     return Container(
       constraints: BoxConstraints(maxWidth: 500),
-      child: Text(source),
+      child: Text(
+        source,
+        style: TextStyle(fontSize: 14),
+      ),
     );
   }
 }
@@ -189,26 +193,40 @@ class HeadingLine extends GemtextLine {
 
   @override
   Widget build(BuildContext context) {
+    final style = switch (level) {
+      1 => GoogleFonts.inter(
+          fontSize: 36,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -0.5,
+        ),
+      2 => GoogleFonts.inter(
+          fontSize: 24,
+          fontWeight: FontWeight.w400,
+        ),
+      3 => GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        ),
+      int() => TextStyle(),
+    };
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Text(
-        text.trim(),
-        style: switch (level) {
-          1 => GoogleFonts.inter(
-              fontSize: min(36, 36 * MediaQuery.of(context).size.width / 500),
-              fontWeight: FontWeight.w300,
-              letterSpacing: -0.5,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: " ".padLeft(level + 1, '#'),
+              style: style.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(.5),
+              ),
             ),
-          2 => GoogleFonts.inter(
-              fontSize: min(24, 24 * MediaQuery.of(context).size.width / 500),
-              fontWeight: FontWeight.w300,
+            TextSpan(
+              text: text.trim(),
+              style: style,
             ),
-          3 => GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w300,
-            ),
-          int() => null,
-        },
+          ],
+        ),
       ),
     );
   }
@@ -223,13 +241,8 @@ class SiteTitle extends HeadingLine {
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Text(
         super.text.trim(),
-        // style: GoogleFonts.inter(
-        //   fontSize: max(42, 42 * MediaQuery.of(context).size.width / 1000),
-        //   fontWeight: FontWeight.w400,
-        //   letterSpacing: -0.5,
-        // ),
-        style: GoogleFonts.playfairDisplay(
-          fontSize: min(80, 80 * MediaQuery.of(context).size.width / 1000),
+        style: GoogleFonts.inter(
+          fontSize: 40,
           fontWeight: FontWeight.w300,
           letterSpacing: -0.5,
         ),

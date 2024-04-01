@@ -65,6 +65,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  faker:
+    dependency: "direct main"
+    description:
+      name: faker
+      sha256: "746e59f91d8b06a389e74cf76e909a05ed69c12691768e2f93557fdf29200fd0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   ffi:
     dependency: transitive
     description:
@@ -96,6 +104,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  gap:
+    dependency: "direct main"
+    description:
+      name: gap
+      sha256: f19387d4e32f849394758b91377f9153a1b41d79513ef7668c088c77dbc6955d
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   google_fonts:
     dependency: "direct main"
     description:
@@ -264,6 +280,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
+  screen_retriever:
+    dependency: transitive
+    description:
+      name: screen_retriever
+      sha256: "6ee02c8a1158e6dae7ca430da79436e3b1c9563c8cf02f524af997c201ac2b90"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.9"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -421,6 +445,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.3.0"
+  window_manager:
+    dependency: "direct main"
+    description:
+      name: window_manager
+      sha256: b3c895bdf936c77b83c5254bec2e6b3f066710c1f89c38b20b8acc382b525494
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.8"
   xdg_directories:
     dependency: transitive
     description:
