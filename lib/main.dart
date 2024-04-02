@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gemini_browser/gemini/gemini_browser_view.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
 import 'package:gemini_browser/providers/sidebar_controller.dart';
+import 'package:gemini_browser/providers/split_view_list_controller.dart';
 import 'package:gemini_browser/providers/tab_list_controller.dart';
 import 'package:gemini_browser/widgets/collapsible_sidebar.dart';
+import 'package:gemini_browser/widgets/split_view_list.dart';
 import 'package:gemini_browser/widgets/topbar.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
@@ -32,9 +34,10 @@ class MyApp extends StatelessWidget {
     }
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => GeminiConnectionProvider()),
+        // ChangeNotifierProvider(create: (_) => GeminiConnectionProvider()),
         ChangeNotifierProvider(create: (_) => SidebarController()),
         ChangeNotifierProvider(create: (_) => TabListController()),
+        ChangeNotifierProvider(create: (_) => SplitViewListController()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -62,8 +65,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    const body = GeminiBrowserView();
-
     divider() => Divider(
           height: 1,
           indent: 0,
@@ -82,13 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   CollapsibleSidebarView(),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TopbarWidget(),
-                        Expanded(child: body),
-                      ],
-                    ),
+                    child: SplitViewListWidget(),
                   ),
                 ],
               ),

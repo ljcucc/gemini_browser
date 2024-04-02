@@ -12,8 +12,8 @@ class CollapsibleSidebarView extends StatelessWidget {
     final show = Provider.of<SidebarController>(context).show;
 
     final overflowHiddenBody = AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOutCubic,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOutCubicEmphasized,
       width: show ? width : 0,
       child: const SingleChildScrollView(
         scrollDirection: Axis.horizontal,

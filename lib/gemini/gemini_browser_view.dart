@@ -14,20 +14,20 @@ class GeminiBrowserView extends StatelessWidget {
       builder: (context, gcp, child) {
         final header = gcp.connection.header;
 
-        Widget contentView = Center(
+        Widget contentView = const Center(
           child: Text("Waiting for connection"),
         );
 
         if (header?.status == 10) {
-          contentView = GeminiInputPropmtWidget();
+          contentView = const GeminiInputPropmtWidget();
         }
 
         if (header?.isGemtext ?? false) {
           contentView = SingleChildScrollView(
-            padding: EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
             child: Center(
               child: Container(
-                constraints: BoxConstraints(maxWidth: 1000),
+                constraints: const BoxConstraints(maxWidth: 1000),
                 child: GemtextDispWidget(
                   sourceCode: gcp.connection.sourceCode,
                 ),
@@ -42,7 +42,7 @@ class GeminiBrowserView extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Text(
                     gcp.connection.sourceCode,
                     style: GoogleFonts.robotoMono(),
@@ -64,20 +64,6 @@ class GeminiBrowserView extends StatelessWidget {
         }
 
         return Container(
-          // decoration: BoxDecoration(
-          //   gradient: LinearGradient(
-          //     end: Alignment.bottomCenter,
-          //     begin: Alignment.topCenter,
-          //     stops: const [0.6, 1],
-          //     colors: [
-          //       Theme.of(context).colorScheme.background,
-          //       Theme.of(context)
-          //           .colorScheme
-          //           .secondaryContainer
-          //           .withOpacity(0.3),
-          //     ],
-          //   ),
-          // ),
           color: Theme.of(context).colorScheme.surface,
           child: Column(
             children: [
