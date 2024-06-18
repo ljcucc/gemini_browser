@@ -44,6 +44,9 @@ dependencies:
   gemini_connect:
     path: ../packages/gemini_connect
 
+  gemtext:
+    path: ../packages/gemtext
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

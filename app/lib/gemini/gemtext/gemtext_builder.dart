@@ -6,46 +6,74 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
 import 'package:gemini_browser/gemini/gemtext/image_disp/link_image_disp_widget.dart';
+import 'package:gemtext/parser.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'package:path/path.dart' as p;
 
-abstract class GemtextLine {
-  Widget build(BuildContext context);
-}
-
-class ParagraphLine extends GemtextLine {
-  String source;
-  ParagraphLine(this.source);
+class GemtextBuilder extends StatelessWidget {
+  final GemtextParser parser;
+  const GemtextBuilder({super.key, required this.parser});
 
   @override
   Widget build(BuildContext context) {
-    if (source.trim() == "---" || source.trim() == "===") {
-      return Divider();
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      itemCount: parser.parsed.length,
+      itemBuilder: (BuildContext context, int index) {
+        final item = parser.parsed[index];
+
+        switch (item.runtimeType) {
+          case ParagraphLine:
+            return ParagraphLineView(content: item as ParagraphLine);
+          case LinkLine:
+            return LinkLineView(content: item as LinkLine);
+          case PreformattedLines:
+            return PreformattedLinesView(content: item as PreformattedLines);
+          case BlockQuoteLine:
+            return BlockQuoteLineView(content: item as BlockQuoteLine);
+          case ListLines:
+            return ListLinesView(content: item as ListLines);
+          case SiteTitle:
+            return SiteTitleView(content: item as SiteTitle);
+          case HeadingLine:
+            return HeadingLineView(content: item as HeadingLine);
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+class ParagraphLineView extends StatelessWidget {
+  final ParagraphLine content;
+
+  const ParagraphLineView({
+    super.key,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (content.source.trim() == "---" || content.source.trim() == "===") {
+      return const Divider();
     }
 
     return Container(
-      constraints: BoxConstraints(maxWidth: 500),
+      constraints: const BoxConstraints(maxWidth: 500),
       child: Text(
-        source,
-        style: TextStyle(fontSize: 14),
+        content.source,
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }
 }
 
-class LinkLine extends GemtextLine {
-  String source;
-  late String link;
-  late String text;
-
-  LinkLine(this.source) {
-    final linkContent = source.replaceFirst("=> ", "");
-
-    link = linkContent.split(RegExp("\\s+"))[0];
-    text = linkContent.substring(link.length);
-  }
+class LinkLineView extends StatelessWidget {
+  final LinkLine content;
+  const LinkLineView({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +81,7 @@ class LinkLine extends GemtextLine {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Text(
         maxLines: null,
-        text.isEmpty ? link : text.trim(),
+        content.text.isEmpty ? content.link : content.text.trim(),
         style: TextStyle(
           decorationColor: Theme.of(context).colorScheme.primary,
           decoration: TextDecoration.underline,
@@ -62,10 +90,10 @@ class LinkLine extends GemtextLine {
       ),
     );
     if ([".jpg", ".jpeg", ".png", ".gif", ".webp"]
-        .contains(p.extension(link).toLowerCase())) {
+        .contains(p.extension(content.link).toLowerCase())) {
       return LinkImageDispWidget(
-        key: Key(link),
-        link: link,
+        key: Key(content.link),
+        link: content.link,
         child: body,
       );
     }
@@ -73,13 +101,13 @@ class LinkLine extends GemtextLine {
     return Material(
       color: Colors.transparent,
       child: Tooltip(
-        waitDuration: Duration(milliseconds: 1500),
-        message: link,
+        waitDuration: const Duration(milliseconds: 1500),
+        message: content.link,
         child: InkWell(
           onTap: () {
             final gcp =
                 Provider.of<GeminiConnectionProvider>(context, listen: false);
-            final url = gcp.connection.resolve(link);
+            final url = gcp.connection.resolve(content.link);
             gcp.push(url);
           },
           child: body,
@@ -89,16 +117,9 @@ class LinkLine extends GemtextLine {
   }
 }
 
-class PreformattedLines extends GemtextLine {
-  String source;
-  PreformattedLines(this.source);
-
-  @override
-  String toString() {
-    const start = 3;
-    final end = source.endsWith("```\n") ? -4 : 0;
-    return source.substring(start, source.length + end);
-  }
+class PreformattedLinesView extends StatelessWidget {
+  final PreformattedLines content;
+  const PreformattedLinesView({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +131,7 @@ class PreformattedLines extends GemtextLine {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.all(16),
         child: Text(
-          toString(),
+          this.content.toString(),
           style: GoogleFonts.notoSansMono(letterSpacing: 0),
         ),
       ),
@@ -118,34 +139,28 @@ class PreformattedLines extends GemtextLine {
   }
 }
 
-class BlockQuoteLine extends GemtextLine {
-  String source;
-  BlockQuoteLine(this.source);
+class BlockQuoteLineView extends StatelessWidget {
+  final BlockQuoteLine content;
+  const BlockQuoteLineView({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 16),
+      margin: const EdgeInsets.symmetric(vertical: 16),
       elevation: 8,
       shadowColor: Colors.transparent,
       surfaceTintColor: Theme.of(context).colorScheme.tertiaryContainer,
       child: Container(
-        padding: EdgeInsets.all(16),
-        child: Text(source.substring(1).trimLeft()),
+        padding: const EdgeInsets.all(16),
+        child: Text(content.source.substring(1).trimLeft()),
       ),
     );
   }
 }
 
-class ListLines extends GemtextLine {
-  List<String> items;
-
-  ListLines(this.items);
-
-  @override
-  String toString() {
-    return items.toString();
-  }
+class ListLinesView extends StatelessWidget {
+  final ListLines content;
+  const ListLinesView({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +169,7 @@ class ListLines extends GemtextLine {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final line in items)
+          for (final line in content.items)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -177,23 +192,13 @@ class ListLines extends GemtextLine {
   }
 }
 
-class HeadingLine extends GemtextLine {
-  String source;
-
-  /// The level number of heading line
-  late int level;
-
-  HeadingLine(this.source) {
-    level = source.split(" ")[0].length;
-  }
-
-  String get text {
-    return source.substring(level + 1);
-  }
+class HeadingLineView extends StatelessWidget {
+  final HeadingLine content;
+  const HeadingLineView({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {
-    final style = switch (level) {
+    final style = switch (content.level) {
       1 => GoogleFonts.inter(
           fontSize: 36,
           fontWeight: FontWeight.w400,
@@ -216,13 +221,13 @@ class HeadingLine extends GemtextLine {
         TextSpan(
           children: [
             TextSpan(
-              text: " ".padLeft(level + 1, '#'),
+              text: " ".padLeft(content.level + 1, '#'),
               style: style.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(.5),
               ),
             ),
             TextSpan(
-              text: text.trim(),
+              text: content.text.trim(),
               style: style,
             ),
           ],
@@ -232,15 +237,16 @@ class HeadingLine extends GemtextLine {
   }
 }
 
-/// The first header will considered as a SiteTitle
-class SiteTitle extends HeadingLine {
-  SiteTitle(super.source);
+class SiteTitleView extends StatelessWidget {
+  final SiteTitle content;
+  const SiteTitleView({super.key, required this.content});
 
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Text(
-        super.text.trim(),
+        content.text.trim(),
         style: GoogleFonts.inter(
           fontSize: 40,
           fontWeight: FontWeight.w300,
@@ -248,83 +254,5 @@ class SiteTitle extends HeadingLine {
         ),
       ),
     );
-  }
-}
-
-class GemtextParser {
-  final Uint8List sourceBuffer;
-
-  String title = "";
-  List<GemtextLine> result = [];
-
-  GemtextParser(this.sourceBuffer);
-
-  List<GemtextLine> get parsed {
-    result = [];
-    _parse(utf8.decode(sourceBuffer));
-    return result;
-  }
-
-  void _parse(String sourceCode) {
-    String buffer = "";
-
-    for (final line in sourceCode.split("\n")) {
-      // print(line);
-
-      final isListGroup = buffer.startsWith("* ");
-      final isPreformatted = buffer.startsWith("```");
-
-      if (line.startsWith("* ") && (isListGroup || buffer.isEmpty)) {
-        // print("list detected");
-        buffer += line + "\n";
-        continue;
-      } else if (isListGroup && !line.startsWith("* ")) {
-        result.add(
-          ListLines(buffer.trim().split("\n")),
-        );
-        buffer = "";
-      }
-
-      // start and reset of code block
-      if (line.startsWith("```")) {
-        // print("preformat heading detected");
-        buffer += "```\n";
-
-        if (isPreformatted) {
-          result.add(PreformattedLines(buffer));
-          buffer = "";
-        }
-        continue;
-      } else if (isPreformatted) {
-        // end of codeblock
-
-        buffer += line + "\n";
-        continue;
-      }
-
-      if ((line.startsWith("# ") ||
-              line.startsWith("## ") ||
-              line.startsWith("### ")) &&
-          buffer.isEmpty) {
-        if (result.isEmpty)
-          result.add(SiteTitle(line));
-        else
-          result.add(HeadingLine(line));
-
-        continue;
-      }
-
-      if (line.startsWith("=> ") && buffer.isEmpty) {
-        result.add(LinkLine(line));
-        continue;
-      }
-
-      if (line.startsWith(">") && buffer.isEmpty) {
-        result.add(BlockQuoteLine(line));
-        continue;
-      }
-
-      result.add(ParagraphLine(line));
-    }
   }
 }

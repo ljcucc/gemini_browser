@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
 import 'package:gemini_browser/gemini/gemini_input_prompt_widget.dart';
-import 'package:gemini_browser/gemini/gemtext/gemtext_disp_widget.dart';
+import 'package:gemini_browser/gemini/gemtext/gemtext_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -23,14 +23,12 @@ class GeminiBrowserView extends StatelessWidget {
         }
 
         if (header?.isGemtext ?? false) {
-          contentView = SingleChildScrollView(
-            padding: const EdgeInsets.all(32),
-            child: Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1000),
-                child: GemtextDispWidget(
-                  sourceCode: gcp.connection.sourceCode,
-                ),
+          contentView = Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 1000),
+              padding: EdgeInsets.all(16),
+              child: GemtextView(
+                sourceCode: gcp.connection.sourceCode,
               ),
             ),
           );
