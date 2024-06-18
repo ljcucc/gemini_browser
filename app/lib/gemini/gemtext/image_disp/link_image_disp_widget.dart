@@ -2,10 +2,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gemini_browser/gemini/gemini_connection.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
 import 'package:gemini_browser/gemini/gemtext/image_disp/image_disp_fullscreen_page.dart';
+import 'package:gemini_connect/gemini_connection.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LinkImageDispWidget extends StatefulWidget {
   final String link;
@@ -32,7 +33,9 @@ class _LinkImageDispWidgetState extends State<LinkImageDispWidget> {
     });
     final gcp = Provider.of<GeminiConnectionProvider>(context, listen: false);
     final baseUri = gcp.connection.uri;
-    final connection = GeminiConnection();
+    final connection = GeminiConnection(resolver: (Uri url) {
+      launchUrl(url);
+    });
     connection.uri = baseUri;
     final url = connection.resolve(widget.link);
     await connection.connect(url);

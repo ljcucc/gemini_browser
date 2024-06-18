@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gemini_browser/gemini/gemini_connection.dart';
+import 'package:gemini_connect/gemini_connection.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GeminiConnectionProvider extends ChangeNotifier {
   /// The connecting state of this connection provider
@@ -8,7 +9,9 @@ class GeminiConnectionProvider extends ChangeNotifier {
   /// History stack of this connection provider
   List<Uri> history = [];
 
-  GeminiConnection connection = GeminiConnection();
+  GeminiConnection connection = GeminiConnection(resolver: (Uri url) {
+    launchUrl(url);
+  });
 
   /// Make a connection to a gemini site.
   Future<void> push(Uri url) async {

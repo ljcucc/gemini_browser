@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:gemini_browser/gemini/response_header_decoder.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:gemini_connect/response_header_decoder.dart';
 import 'package:path/path.dart' as p;
 
 class GeminiConnection {
+  // resolve non-gemini connection
+  final Function(Uri url) resolver;
+  GeminiConnection({required this.resolver});
+
   /// The url that this connection provider stored
   Uri uri = Uri();
 
@@ -65,7 +68,7 @@ class GeminiConnection {
 
   Stream<Uint8List> connectStream(Uri url) async* {
     if (url.scheme != "gemini") {
-      launchUrl(url);
+      resolver(url);
       return;
     }
     this.uri = url;
