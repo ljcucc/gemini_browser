@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gemini_browser/gemini/gemini_connection.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
+import 'package:gemini_browser/gemini/gemtext/image_disp/image_disp_fullscreen_page.dart';
 import 'package:provider/provider.dart';
 
 class LinkImageDispWidget extends StatefulWidget {
@@ -48,13 +49,10 @@ class _LinkImageDispWidgetState extends State<LinkImageDispWidget> {
   _openImageViewer(context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(),
-          body: InteractiveViewer(
-            child: Center(
-              child: Image.memory(buffer!),
-            ),
-          ),
+        fullscreenDialog: true,
+        // barrierDismissible: true,
+        builder: (context) => ImageDisplayFullscreenPage(
+          buffer: buffer!,
         ),
       ),
     );
@@ -107,7 +105,11 @@ class _LinkImageDispWidgetState extends State<LinkImageDispWidget> {
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () => _openImageViewer(context),
-              child: Image.memory(buffer!),
+              child: Hero(
+                transitionOnUserGestures: true,
+                tag: buffer.hashCode,
+                child: Image.memory(buffer!),
+              ),
             ),
           ),
         );

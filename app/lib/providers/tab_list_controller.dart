@@ -18,4 +18,9 @@ class TabListController extends ChangeNotifier {
     _index = value;
     notifyListeners();
   }
+
+  newTab(String name) {
+    tabs.add(name);
+    notifyListeners();
+  }
 }

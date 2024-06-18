@@ -6,7 +6,6 @@ import 'package:gemini_browser/providers/split_view_list_controller.dart';
 import 'package:gemini_browser/providers/tab_list_controller.dart';
 import 'package:gemini_browser/widgets/collapsible_sidebar.dart';
 import 'package:gemini_browser/widgets/split_view_list.dart';
-import 'package:gemini_browser/widgets/topbar.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_browser/gemini/gemini_browser_view.dart';
 import 'package:gemini_browser/providers/split_view_list_controller.dart';
-import 'package:gemini_browser/widgets/topbar.dart';
+import 'package:gemini_browser/widgets/topbar/topbar.dart';
 import 'package:provider/provider.dart';
 
 class SplitViewListWidget extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_browser/providers/sidebar_controller.dart';
-import 'package:gemini_browser/widgets/tab_listview.dart';
+import 'package:gemini_browser/widgets/tab_listview/tab_listview.dart';
 import 'package:provider/provider.dart';
 
 class CollapsibleSidebarView extends StatelessWidget {

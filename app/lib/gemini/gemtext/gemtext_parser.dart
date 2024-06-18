@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
-import 'package:gemini_browser/gemini/gemtext/link_image_disp_widget.dart';
+import 'package:gemini_browser/gemini/gemtext/image_disp/link_image_disp_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
