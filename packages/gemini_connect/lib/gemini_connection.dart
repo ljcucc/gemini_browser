@@ -5,6 +5,20 @@ import 'dart:typed_data';
 import 'package:gemini_connect/response_header_decoder.dart';
 import 'package:path/path.dart' as p;
 
+Uri mergeUri(
+  Uri master,
+  Uri slave, {
+  bool maskQuery = false,
+}) {
+  return Uri(
+    scheme: master.scheme.isEmpty ? slave.scheme : master.scheme,
+    host: master.host.isNotEmpty ? master.host : slave.host,
+    path: master.path.isNotEmpty ? master.path : slave.path,
+    query:
+        maskQuery ? "" : (master.query.isNotEmpty ? master.query : slave.query),
+  );
+}
+
 class GeminiConnection {
   // resolve non-gemini connection
   final Function(Uri url) resolver;
@@ -39,31 +53,17 @@ class GeminiConnection {
     return Uri.parse("$defaultSearch${Uri.encodeFull(query)}");
   }
 
-  Uri resolve(String linkText, {String query = ""}) {
-    var protocol = Uri.tryParse(linkText)?.scheme ?? "";
-    if (protocol.isNotEmpty && protocol != "gemini") {
-      return Uri.parse(linkText);
-    }
-
-    if (query.isNotEmpty) {
-      query = "?${Uri.encodeFull(query)}";
-    }
-
-    if (linkText.startsWith("gemini://")) {
-      return Uri.parse(linkText);
-    } else if (linkText.startsWith("//")) {
-      return Uri.parse("gemini:$linkText");
-    } else if (linkText.startsWith("/")) {
-      // print("absolute path");
-      return Uri.parse("gemini://${uri.host}$linkText$query");
-    }
-    final path = p.dirname(uri.path);
-
-    if (p.extension(uri.path).isNotEmpty) {
-      return Uri.parse("gemini://${uri.host}${p.join(path, linkText)}$query");
-    }
-
-    return Uri.parse("gemini://${uri.host}${p.join(uri.path, linkText)}$query");
+  Uri resolve(String linkText) {
+    final masterUrl = Uri.tryParse(linkText) ?? Uri();
+    var result = mergeUri(
+      masterUrl,
+      mergeUri(
+        uri,
+        Uri(scheme: "gemini"),
+        maskQuery: true,
+      ),
+    );
+    return result;
   }
 
   Stream<Uint8List> connectStream(Uri url) async* {
