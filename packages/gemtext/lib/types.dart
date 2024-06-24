@@ -11,7 +11,7 @@ class LinkLine {
   late String text;
 
   LinkLine(this.source) {
-    final linkContent = source.replaceFirst("=> ", "");
+    final linkContent = source.replaceFirst("=>", "").trimLeft();
 
     link = linkContent.split(RegExp("\\s+"))[0];
     text = linkContent.substring(link.length);

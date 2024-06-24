@@ -70,7 +70,7 @@ class GemtextParser {
         continue;
       }
 
-      if (line.startsWith("=> ") && buffer.isEmpty) {
+      if (line.startsWith("=>") && buffer.isEmpty) {
         result.add(LinkLine(line));
         continue;
       }
