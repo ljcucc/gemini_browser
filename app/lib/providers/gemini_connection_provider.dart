@@ -1,25 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:gemini_browser/widgets/prompt/prompt_message.dart';
 import 'package:gemini_connect/gemini_connection.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+class BrowserContext extends GeminiConnection {
+  late GeminiConnection connection;
+  PromptMessage? prompt;
+
+  BrowserContext()
+      : super(resolver: (Uri url) {
+          launchUrl(url);
+        });
+}
 
 class GeminiConnectionProvider extends ChangeNotifier {
   /// The connecting state of this connection provider
   bool connecting = false;
 
   /// History stack of this connection provider
-  List<Uri> history = [];
+  late List<BrowserContext> history = [BrowserContext()];
 
-  GeminiConnection connection = GeminiConnection(resolver: (Uri url) {
-    launchUrl(url);
-  });
+  BrowserContext get connection => history.last;
 
   /// Make a connection to a gemini site.
   Future<void> push(Uri url) async {
     connecting = true;
     notifyListeners();
 
-    await connection.connect(url);
-    history.add(url);
+    // push history
+    final context = BrowserContext();
+    await context.connect(url);
+    if (context.header?.status == 10) {
+      connection.prompt = PromptMessage(
+        title: context.header?.meta ?? "",
+        destination: context.uri,
+      );
+    } else {
+      history.add(context);
+    }
+
+    print("page loaded");
 
     connecting = false;
     notifyListeners();
@@ -30,8 +50,6 @@ class GeminiConnectionProvider extends ChangeNotifier {
     notifyListeners();
 
     history.removeAt(history.length - 1);
-    final url = history.last;
-    await connection.connect(url);
 
     connecting = false;
     notifyListeners();
@@ -41,8 +59,10 @@ class GeminiConnectionProvider extends ChangeNotifier {
     connecting = true;
     notifyListeners();
 
-    history.add(url);
-    await for (final _ in connection.connectStream(url)) {
+    final context = BrowserContext();
+    history.add(context);
+
+    await for (final _ in context.connection.connectStream(url)) {
       notifyListeners();
     }
 

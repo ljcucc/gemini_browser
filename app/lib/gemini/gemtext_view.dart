@@ -1,16 +1,48 @@
-import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:gemini_browser/widgets/waveline_divider.dart';
+import 'package:gemtext/types.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
-import 'package:gemini_browser/gemini/gemtext/image_disp/link_image_disp_widget.dart';
+import 'package:gap/gap.dart';
+import 'package:gemini_browser/providers/gemini_connection_provider.dart';
 import 'package:gemtext/parser.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'package:path/path.dart' as p;
+import 'package:google_fonts/google_fonts.dart';
+
+class GemtextView extends StatelessWidget {
+  const GemtextView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<GeminiConnectionProvider>(builder: (context, gcp, _) {
+      return GemtextBuilder(
+        parser: GemtextParser(gcp.connection.body),
+      );
+    });
+  }
+}
+
+const fontVariations = <ui.FontVariation>[
+  // RobotoFlex-VariableFont_GRAD,XOPQ,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght
+  ui.FontVariation('wght', 800.0),
+  ui.FontVariation('wdth', 151.0),
+  ui.FontVariation('opsz', 24.0),
+  ui.FontVariation('GRAD', 0.0),
+  ui.FontVariation('XOPQ', 96.0),
+  ui.FontVariation('XTRA', 603.0),
+  ui.FontVariation('YOPQ', 79.0),
+  ui.FontVariation('YTAS', 750.0),
+  ui.FontVariation('YTDE', -203.0),
+  ui.FontVariation('YTFI', 738.0),
+  ui.FontVariation('YTLC', 514.0),
+  ui.FontVariation('YTUC', 712.0),
+];
 
 class GemtextBuilder extends StatelessWidget {
   final GemtextParser parser;
@@ -19,6 +51,7 @@ class GemtextBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       scrollDirection: Axis.vertical,
       itemCount: parser.parsed.length,
       itemBuilder: (BuildContext context, int index) {
@@ -57,8 +90,9 @@ class ParagraphLineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (content.source.trim() == "---" || content.source.trim() == "===") {
-      return const Divider();
+    if (content.source.trim().startsWith("--") ||
+        content.source.trim().startsWith("==")) {
+      return const WavelineDivider();
     }
 
     return Container(
@@ -77,33 +111,52 @@ class LinkLineView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget body = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        maxLines: null,
-        content.text.isEmpty ? content.link : content.text.trim(),
-        style: TextStyle(
-          decorationColor: Theme.of(context).colorScheme.primary,
-          decoration: TextDecoration.underline,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+    Widget linkText = content.text.trim().isEmpty
+        ? Text(
+            maxLines: null,
+            content.link,
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                maxLines: null,
+                content.text.trim(),
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              Opacity(
+                opacity: .5,
+                child: Text(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  content.link,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ],
+          );
+    final body = Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      surfaceTintColor: Theme.of(context).colorScheme.tertiaryContainer,
+      elevation: 8,
+      shadowColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 400),
+        padding: const EdgeInsets.all(24),
+        child: linkText,
       ),
     );
-    if ([".jpg", ".jpeg", ".png", ".gif", ".webp"]
-        .contains(p.extension(content.link).toLowerCase())) {
-      return LinkImageDispWidget(
-        key: Key(content.link),
-        link: content.link,
-        child: body,
-      );
-    }
 
-    return Material(
-      color: Colors.transparent,
+    return Align(
+      alignment: Alignment.topLeft,
       child: Tooltip(
         waitDuration: const Duration(milliseconds: 1500),
         message: content.link,
         child: InkWell(
+          borderRadius: BorderRadius.circular(24),
           onTap: () {
             final gcp =
                 Provider.of<GeminiConnectionProvider>(context, listen: false);
@@ -131,7 +184,7 @@ class PreformattedLinesView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.all(16),
         child: Text(
-          this.content.toString(),
+          content.text,
           style: GoogleFonts.notoSansMono(letterSpacing: 0),
         ),
       ),
@@ -199,18 +252,24 @@ class HeadingLineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = switch (content.level) {
-      1 => GoogleFonts.inter(
+      1 => TextStyle(
+          fontFamily: "RobotoFlex",
           fontSize: 36,
           fontWeight: FontWeight.w400,
           letterSpacing: -0.5,
+          fontVariations: fontVariations,
         ),
-      2 => GoogleFonts.inter(
+      2 => TextStyle(
+          fontFamily: "RobotoFlex",
           fontSize: 24,
           fontWeight: FontWeight.w400,
+          fontVariations: fontVariations,
         ),
-      3 => GoogleFonts.inter(
+      3 => TextStyle(
+          fontFamily: "RobotoFlex",
           fontSize: 16,
           fontWeight: FontWeight.w400,
+          fontVariations: fontVariations,
         ),
       int() => TextStyle(),
     };
@@ -247,10 +306,12 @@ class SiteTitleView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Text(
         content.text.trim(),
-        style: GoogleFonts.inter(
+        style: TextStyle(
+          fontFamily: "RobotoFlex",
           fontSize: 40,
           fontWeight: FontWeight.w300,
           letterSpacing: -0.5,
+          fontVariations: fontVariations,
         ),
       ),
     );

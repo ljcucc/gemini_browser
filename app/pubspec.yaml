@@ -39,13 +39,17 @@ dependencies:
   url_launcher: ^6.2.5
   gap: ^3.0.1
   faker: ^2.1.0
-  window_manager: ^0.3.8
 
   gemini_connect:
     path: ../packages/gemini_connect
 
   gemtext:
     path: ../packages/gemtext
+
+  custom_waveline:
+    path: ../packages/custom_waveline
+
+  dynamic_color: ^1.7.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +88,11 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+  fonts:
+    - family: RobotoFlex
+      fonts:
+        - asset: assets/fonts/RobotoFlex-VariableFont.ttf
+
   # fonts:
   #   - family: Schyler
   #     fonts:
