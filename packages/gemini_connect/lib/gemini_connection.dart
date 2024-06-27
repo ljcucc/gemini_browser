@@ -3,21 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:gemini_connect/response_header_decoder.dart';
+import 'package:gemini_connect/url_resolve.dart';
 import 'package:path/path.dart' as p;
-
-Uri mergeUri(
-  Uri master,
-  Uri slave, {
-  bool maskQuery = false,
-}) {
-  return Uri(
-    scheme: master.scheme.isEmpty ? slave.scheme : master.scheme,
-    host: master.host.isNotEmpty ? master.host : slave.host,
-    path: master.path.isNotEmpty ? master.path : slave.path,
-    query:
-        maskQuery ? "" : (master.query.isNotEmpty ? master.query : slave.query),
-  );
-}
 
 class GeminiConnection {
   // resolve non-gemini connection
@@ -51,19 +38,6 @@ class GeminiConnection {
 
   Uri searchResolve(String query) {
     return Uri.parse("$defaultSearch${Uri.encodeFull(query)}");
-  }
-
-  Uri resolve(String linkText) {
-    final masterUrl = Uri.tryParse(linkText) ?? Uri();
-    var result = mergeUri(
-      masterUrl,
-      mergeUri(
-        uri,
-        Uri(scheme: "gemini"),
-        maskQuery: true,
-      ),
-    );
-    return result;
   }
 
   Stream<Uint8List> connectStream(Uri url) async* {
@@ -131,7 +105,13 @@ class GeminiConnection {
     redirect = (header!.status == 30 || header!.status == 31);
 
     if (redirect) {
-      uri = resolve(header!.meta.replaceAll("\r", ""));
+      // uri = resolve(header!.meta.replaceAll("\r", ""));
+      final redirectUri = Uri.parse(header!.meta.replaceAll("\r", ""));
+      if (redirectUri.hasScheme) {
+        uri = redirectUri;
+      } else {
+        uri = uriOverride(uri, redirectUri);
+      }
       await for (final value in connectStream(uri)) {
         yield value;
       }
