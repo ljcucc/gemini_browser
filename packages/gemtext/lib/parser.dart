@@ -57,9 +57,9 @@ class GemtextParser {
         continue;
       }
 
-      if ((line.startsWith("# ") ||
-              line.startsWith("## ") ||
-              line.startsWith("### ")) &&
+      if ((line.startsWith("###") ||
+              line.startsWith("##") ||
+              line.startsWith("#")) &&
           buffer.isEmpty) {
         if (result.isEmpty) {
           result.add(SiteTitle(line));

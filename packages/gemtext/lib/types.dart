@@ -58,11 +58,19 @@ class HeadingLine {
   late int level;
 
   HeadingLine(this.source) {
-    level = source.split(" ")[0].length;
+    if (source.startsWith("###")) {
+      level = 3;
+    } else if (source.startsWith("##")) {
+      level = 2;
+    } else if (source.startsWith("#")) {
+      level = 1;
+    } else {
+      level = 0;
+    }
   }
 
   String get text {
-    return source.substring(level + 1);
+    return source.substring(level).trimLeft();
   }
 }
 
