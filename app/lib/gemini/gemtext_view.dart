@@ -1,5 +1,8 @@
 import 'dart:math';
 import 'dart:ui' as ui;
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:gemini_browser/gemini/gemtext/linkline_view.dart';
+import 'package:gemini_browser/utils/url_resolve.dart';
 import 'package:gemini_browser/widgets/waveline_divider.dart';
 import 'package:gemtext/types.dart';
 import 'package:path/path.dart' as p;
@@ -50,33 +53,76 @@ class GemtextBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-      scrollDirection: Axis.vertical,
-      itemCount: parser.parsed.length,
-      itemBuilder: (BuildContext context, int index) {
-        final item = parser.parsed[index];
-
+    final List<Widget> elements = parser.parsed.map<Widget>(
+      (item) {
         switch (item.runtimeType) {
           case ParagraphLine:
-            return ParagraphLineView(content: item as ParagraphLine);
+            return SizedBox(
+              width: 1000,
+              child: ParagraphLineView(content: item as ParagraphLine),
+            );
           case LinkLine:
             return LinkLineView(content: item as LinkLine);
+            return Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 500,
+                ),
+                child: LinkLineView(content: item as LinkLine),
+              ),
+            );
           case PreformattedLines:
-            return PreformattedLinesView(content: item as PreformattedLines);
+            return SizedBox(
+              width: 1000,
+              child: PreformattedLinesView(content: item as PreformattedLines),
+            );
           case BlockQuoteLine:
-            return BlockQuoteLineView(content: item as BlockQuoteLine);
+            return SizedBox(
+              width: 1000,
+              child: BlockQuoteLineView(content: item as BlockQuoteLine),
+            );
           case ListLines:
-            return ListLinesView(content: item as ListLines);
+            return SizedBox(
+              width: 1000,
+              child: ListLinesView(content: item as ListLines),
+            );
           case SiteTitle:
-            return SiteTitleView(content: item as SiteTitle);
+            return SizedBox(
+              width: 1000,
+              child: SiteTitleView(content: item as SiteTitle),
+            );
           case HeadingLine:
-            return HeadingLineView(content: item as HeadingLine);
+            return SizedBox(
+              width: 1000,
+              child: HeadingLineView(content: item as HeadingLine),
+            );
           default:
             return Container();
         }
       },
+    ).toList();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: elements,
+      ),
     );
+    // return ListView.builder(
+    //   padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+    //   scrollDirection: Axis.vertical,
+    //   itemCount: elements.length,
+    //   itemBuilder: (BuildContext context, int index) {
+    //     return Padding(
+    //       padding: EdgeInsetsDirectional.only(bottom: 8),
+    //       child: elements[index],
+    //     );
+    //   },
+    // );
   }
 }
 
@@ -97,74 +143,10 @@ class ParagraphLineView extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 500),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Text(
         content.source,
         style: const TextStyle(fontSize: 14),
-      ),
-    );
-  }
-}
-
-class LinkLineView extends StatelessWidget {
-  final LinkLine content;
-  const LinkLineView({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    Widget linkText = content.text.trim().isEmpty
-        ? Text(
-            maxLines: null,
-            content.link,
-          )
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                maxLines: null,
-                content.text.trim(),
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              Opacity(
-                opacity: .5,
-                child: Text(
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  content.link,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ),
-            ],
-          );
-    final body = Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      surfaceTintColor: Theme.of(context).colorScheme.tertiaryContainer,
-      elevation: 8,
-      shadowColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
-        padding: const EdgeInsets.all(24),
-        child: linkText,
-      ),
-    );
-
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Tooltip(
-        waitDuration: const Duration(milliseconds: 1500),
-        message: content.link,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            final gcp =
-                Provider.of<GeminiConnectionProvider>(context, listen: false);
-            final url = gcp.connection.resolve(content.link);
-            gcp.push(url);
-          },
-          child: body,
-        ),
       ),
     );
   }
@@ -199,7 +181,7 @@ class BlockQuoteLineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 16),
+      // margin: const EdgeInsets.symmetric(vertical: 16),
       elevation: 8,
       shadowColor: Colors.transparent,
       surfaceTintColor: Theme.of(context).colorScheme.tertiaryContainer,
@@ -274,8 +256,8 @@ class HeadingLineView extends StatelessWidget {
       int() => TextStyle(),
     };
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+    return Container(
+      // padding: const EdgeInsets.symmetric(vertical: 32),
       child: Text.rich(
         TextSpan(
           children: [

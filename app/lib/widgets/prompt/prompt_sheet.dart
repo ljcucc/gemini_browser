@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gemini_browser/fonts.dart';
 import 'package:gemini_browser/providers/gemini_connection_provider.dart';
+import 'package:gemini_browser/utils/url_resolve.dart';
 import 'package:gemini_connect/gemini_connection.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +19,7 @@ class _PromptTextfieldState extends State<PromptTextfield> {
 
   onSend() async {
     final gcp = Provider.of<GeminiConnectionProvider>(context, listen: false);
-    final uri = mergeUri(
+    final uri = uriOverride(
       Uri(query: Uri.encodeFull(_controller.text)),
       gcp.connection.prompt?.destination ?? Uri(),
     );

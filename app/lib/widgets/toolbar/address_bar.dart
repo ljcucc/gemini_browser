@@ -42,7 +42,7 @@ class _AddressBarState extends State<AddressBar> {
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: StatusCodeWidget(
-                code: '20',
+                code: gcp.connection.header?.status.toString() ?? "-1",
               ),
             ),
             hintText: "Type a capsule url or search",
