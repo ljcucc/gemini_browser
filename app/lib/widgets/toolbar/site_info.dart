@@ -59,7 +59,7 @@ class SiteInfoWidget extends StatelessWidget {
           // padding: EdgeInsets.all(24),
           child: rowActions,
         ),
-        Gap(24),
+        // Gap(24),
       ],
     );
   }

@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:gemini_browser/gemini/gemtext/linkline_view.dart';
-import 'package:gemini_browser/utils/url_resolve.dart';
 import 'package:gemini_browser/widgets/waveline_divider.dart';
 import 'package:gemtext/types.dart';
 import 'package:path/path.dart' as p;
@@ -25,7 +24,7 @@ class GemtextView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<GeminiConnectionProvider>(builder: (context, gcp, _) {
       return GemtextBuilder(
-        parser: GemtextParser(gcp.connection.body),
+        parsed: gcp.connection.parsed,
       );
     });
   }
@@ -48,12 +47,12 @@ const fontVariations = <ui.FontVariation>[
 ];
 
 class GemtextBuilder extends StatelessWidget {
-  final GemtextParser parser;
-  const GemtextBuilder({super.key, required this.parser});
+  final List parsed;
+  const GemtextBuilder({super.key, required this.parsed});
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> elements = parser.parsed.map<Widget>(
+    final List<Widget> elements = parsed.map<Widget>(
       (item) {
         switch (item.runtimeType) {
           case ParagraphLine:
@@ -62,7 +61,7 @@ class GemtextBuilder extends StatelessWidget {
               child: ParagraphLineView(content: item as ParagraphLine),
             );
           case LinkLine:
-            return LinkLineView(content: item as LinkLine);
+            // return LinkLineView(content: item as LinkLine);
             return Align(
               alignment: Alignment.topLeft,
               child: ConstrainedBox(
@@ -75,7 +74,11 @@ class GemtextBuilder extends StatelessWidget {
           case PreformattedLines:
             return SizedBox(
               width: 1000,
-              child: PreformattedLinesView(content: item as PreformattedLines),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child:
+                    PreformattedLinesView(content: item as PreformattedLines),
+              ),
             );
           case BlockQuoteLine:
             return SizedBox(
@@ -103,26 +106,27 @@ class GemtextBuilder extends StatelessWidget {
       },
     ).toList();
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: elements,
-      ),
-    );
-    // return ListView.builder(
-    //   padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+    // return SingleChildScrollView(
     //   scrollDirection: Axis.vertical,
-    //   itemCount: elements.length,
-    //   itemBuilder: (BuildContext context, int index) {
-    //     return Padding(
-    //       padding: EdgeInsetsDirectional.only(bottom: 8),
-    //       child: elements[index],
-    //     );
-    //   },
+    //   padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+    //   child: Wrap(
+    //     spacing: 8,
+    //     runSpacing: 8,
+    //     children: elements,
+    //   ),
     // );
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      scrollDirection: Axis.vertical,
+      itemCount: elements.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+          padding: EdgeInsetsDirectional.only(bottom: 8),
+          child: elements[index],
+        );
+      },
+    );
   }
 }
 
@@ -143,7 +147,7 @@ class ParagraphLineView extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 500),
-      padding: EdgeInsets.symmetric(vertical: 8),
+      // padding: EdgeInsets.symmetric(vertical: 8),
       child: Text(
         content.source,
         style: const TextStyle(fontSize: 14),
@@ -158,16 +162,21 @@ class PreformattedLinesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 24),
-      elevation: 3,
-      shadowColor: Colors.transparent,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.all(16),
-        child: Text(
-          content.text,
-          style: GoogleFonts.notoSansMono(letterSpacing: 0),
+    return Theme(
+      data: MediaQuery.of(context).platformBrightness == ui.Brightness.dark
+          ? ThemeData.light()
+          : ThemeData.dark(),
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: 24),
+        elevation: 3,
+        shadowColor: Colors.transparent,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.all(16),
+          child: Text(
+            content.text,
+            style: GoogleFonts.notoSansMono(letterSpacing: 0),
+          ),
         ),
       ),
     );
@@ -181,8 +190,8 @@ class BlockQuoteLineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      // margin: const EdgeInsets.symmetric(vertical: 16),
-      elevation: 8,
+      margin: EdgeInsets.zero,
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       shadowColor: Colors.transparent,
       surfaceTintColor: Theme.of(context).colorScheme.tertiaryContainer,
       child: Container(

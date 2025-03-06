@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_browser/widgets/prompt/prompt_message.dart';
 import 'package:gemini_connect/gemini_connection.dart';
+import 'package:gemtext/parser.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BrowserContext extends GeminiConnection {
   late GeminiConnection connection;
   PromptMessage? prompt;
+  List? _parsed;
 
-  BrowserContext()
-      : super(resolver: (Uri url) {
-          launchUrl(url);
-        });
+  BrowserContext();
+
+  List get parsed {
+    _parsed ??= GemtextParser(body).parsed;
+    return _parsed!;
+  }
 }
 
 class GeminiConnectionProvider extends ChangeNotifier {
@@ -29,20 +33,28 @@ class GeminiConnectionProvider extends ChangeNotifier {
 
     // push history
     final context = BrowserContext();
-    await context.connect(url);
-    if (context.header?.status == 10) {
-      connection.prompt = PromptMessage(
-        title: context.header?.meta ?? "",
-        destination: context.uri,
-      );
-    } else {
-      history.add(context);
+    try {
+      await context.connect(url);
+
+      if (context.header?.status == 10) {
+        connection.prompt = PromptMessage(
+          title: context.header?.meta ?? "",
+          destination: context.uri,
+        );
+      } else {
+        history.add(context);
+      }
+      print("page loaded");
+    } catch (e) {
+      if (e is UrlException) {
+        launchUrl(url);
+      } else {
+        throw e;
+      }
+    } finally {
+      connecting = false;
+      notifyListeners();
     }
-
-    print("page loaded");
-
-    connecting = false;
-    notifyListeners();
   }
 
   Future<void> pop() async {

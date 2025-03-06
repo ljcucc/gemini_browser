@@ -3,6 +3,7 @@ import 'package:gemini_browser/pages/settings.dart';
 import 'package:gemini_browser/providers/gemini_connection_provider.dart';
 import 'package:gemini_browser/widgets/prompt/prompt_fab.dart';
 import 'package:gemini_browser/widgets/toolbar/address_bar.dart';
+import 'package:gemini_browser/widgets/toolbar/info_sheet.dart';
 import 'package:gemini_browser/widgets/toolbar/loading_indicator.dart';
 import 'package:gemini_browser/widgets/toolbar/site_info.dart';
 import 'package:gemini_browser/widgets/toolbar/tabs_overview_icon.dart';
@@ -93,17 +94,6 @@ class MoreOptionSheet extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class InfoSheet extends StatelessWidget {
-  const InfoSheet({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SiteInfoWidget(),
     );
   }
 }
@@ -207,7 +197,7 @@ class _CompactLayoutState extends State<CompactLayout> {
   @override
   Widget build(BuildContext context) {
     final bottomBar = Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: const AddressBar(),
     );
 
@@ -224,6 +214,8 @@ class _CompactLayoutState extends State<CompactLayout> {
         color: Theme.of(context).colorScheme.surface,
         child: Column(
           children: [
+            bottomBar,
+            const LoadingIndicator(),
             Expanded(
               child: Stack(
                 children: [
@@ -237,8 +229,6 @@ class _CompactLayoutState extends State<CompactLayout> {
                 ],
               ),
             ),
-            const LoadingIndicator(),
-            bottomBar,
           ],
         ),
       ),

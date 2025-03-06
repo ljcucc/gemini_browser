@@ -12,7 +12,6 @@ class AddressBar extends StatefulWidget {
 
 class _AddressBarState extends State<AddressBar> {
   final controller = SearchController();
-  bool isTyping = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +50,6 @@ class _AddressBarState extends State<AddressBar> {
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(.35),
               ),
             ),
-            trailing: [
-              if (isTyping)
-                IconButton.filledTonal(
-                  icon: Icon(Icons.arrow_forward),
-                  onPressed: () {},
-                ),
-            ],
             // backgroundColor:
             //     WidgetStatePropertyAll(Theme.of(context).colorScheme.surface),
             // elevation: WidgetStatePropertyAll(0),
@@ -78,16 +70,6 @@ class _AddressBarState extends State<AddressBar> {
                 text = "gemini://$text";
               }
               gcp.push(Uri.tryParse(text) ?? gcp.connection.uri);
-            },
-            onTap: () {
-              setState(() {
-                isTyping = true;
-              });
-            },
-            onTapOutside: (e) {
-              setState(() {
-                isTyping = false;
-              });
             },
           );
         },

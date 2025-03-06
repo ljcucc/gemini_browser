@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gemini_browser/fonts.dart';
 import 'package:gemini_browser/providers/gemini_connection_provider.dart';
-import 'package:gemini_browser/utils/url_resolve.dart';
-import 'package:gemini_connect/gemini_connection.dart';
+import 'package:gemini_connect/url_resolve.dart';
 import 'package:provider/provider.dart';
 
 class PromptTextfield extends StatefulWidget {

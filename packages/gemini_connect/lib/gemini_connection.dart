@@ -4,12 +4,11 @@ import 'dart:typed_data';
 
 import 'package:gemini_connect/response_header_decoder.dart';
 import 'package:gemini_connect/url_resolve.dart';
-import 'package:path/path.dart' as p;
+
+class UrlException implements Exception {}
 
 class GeminiConnection {
-  // resolve non-gemini connection
-  final Function(Uri url) resolver;
-  GeminiConnection({required this.resolver});
+  GeminiConnection();
 
   /// The url that this connection provider stored
   Uri uri = Uri();
@@ -34,16 +33,10 @@ class GeminiConnection {
   /// If a connection failed, the response header will be cleared
   ResponseHeaderDecoder? header;
 
-  String defaultSearch = "gemini://kennedy.gemi.dev/search?";
-
-  Uri searchResolve(String query) {
-    return Uri.parse("$defaultSearch${Uri.encodeFull(query)}");
-  }
-
   Stream<Uint8List> connectStream(Uri url) async* {
     if (url.scheme != "gemini") {
-      resolver(url);
-      return;
+      print("${url.scheme} is not gemini");
+      throw UrlException();
     }
     this.uri = url;
 
