@@ -1,19 +1,16 @@
-import 'dart:math';
 import 'dart:ui' as ui;
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:gemini_browser/gemini/gemtext/linkline_view.dart';
-import 'package:gemini_browser/widgets/waveline_divider.dart';
+import 'package:gemini_browser/gemini/elements/blockquoteline_view.dart';
+import 'package:gemini_browser/gemini/elements/headline_view.dart';
+import 'package:gemini_browser/gemini/elements/linkline_view.dart';
+import 'package:gemini_browser/gemini/elements/listlines_view.dart';
+import 'package:gemini_browser/gemini/elements/paragraphline_view.dart';
+import 'package:gemini_browser/gemini/elements/preformattedlines_view.dart';
+import 'package:gemini_browser/gemini/elements/sitetitle_view.dart';
 import 'package:gemtext/types.dart';
-import 'package:path/path.dart' as p;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:gap/gap.dart';
 import 'package:gemini_browser/providers/gemini_connection_provider.dart';
-import 'package:gemtext/parser.dart';
 import 'package:provider/provider.dart';
-
-import 'package:google_fonts/google_fonts.dart';
 
 class GemtextView extends StatelessWidget {
   const GemtextView({
@@ -57,7 +54,7 @@ class GemtextBuilder extends StatelessWidget {
         switch (item.runtimeType) {
           case ParagraphLine:
             return SizedBox(
-              width: 1000,
+              // width: 1000,
               child: ParagraphLineView(content: item as ParagraphLine),
             );
           case LinkLine:
@@ -68,7 +65,10 @@ class GemtextBuilder extends StatelessWidget {
                 constraints: BoxConstraints(
                   maxWidth: 500,
                 ),
-                child: LinkLineView(content: item as LinkLine),
+                child: LinkLineView(
+                  content: item as LinkLine,
+                  key: Key(item.hashCode.toString()),
+                ),
               ),
             );
           case PreformattedLines:
@@ -106,204 +106,22 @@ class GemtextBuilder extends StatelessWidget {
       },
     ).toList();
 
-    // return SingleChildScrollView(
-    //   scrollDirection: Axis.vertical,
-    //   padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-    //   child: Wrap(
-    //     spacing: 8,
-    //     runSpacing: 8,
-    //     children: elements,
-    //   ),
-    // );
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+    return SingleChildScrollView(
       scrollDirection: Axis.vertical,
-      itemCount: elements.length,
-      itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: EdgeInsetsDirectional.only(bottom: 8),
-          child: elements[index],
-        );
-      },
-    );
-  }
-}
-
-class ParagraphLineView extends StatelessWidget {
-  final ParagraphLine content;
-
-  const ParagraphLineView({
-    super.key,
-    required this.content,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (content.source.trim().startsWith("--") ||
-        content.source.trim().startsWith("==")) {
-      return const WavelineDivider();
-    }
-
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 500),
-      // padding: EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        content.source,
-        style: const TextStyle(fontSize: 14),
-      ),
-    );
-  }
-}
-
-class PreformattedLinesView extends StatelessWidget {
-  final PreformattedLines content;
-  const PreformattedLinesView({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: MediaQuery.of(context).platformBrightness == ui.Brightness.dark
-          ? ThemeData.light()
-          : ThemeData.dark(),
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 24),
-        elevation: 3,
-        shadowColor: Colors.transparent,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.all(16),
-          child: Text(
-            content.text,
-            style: GoogleFonts.notoSansMono(letterSpacing: 0),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class BlockQuoteLineView extends StatelessWidget {
-  final BlockQuoteLine content;
-  const BlockQuoteLineView({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      shadowColor: Colors.transparent,
-      surfaceTintColor: Theme.of(context).colorScheme.tertiaryContainer,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Text(content.source.substring(1).trimLeft()),
-      ),
-    );
-  }
-}
-
-class ListLinesView extends StatelessWidget {
-  final ListLines content;
-  const ListLinesView({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final line in content.items)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 30,
-                    child: Text("-"),
-                  ),
-                  Expanded(
-                      child: Text(
-                          line.length > 2 ? line.substring(1).trimLeft() : "")),
-                ],
+        spacing: 8,
+        children: elements
+            .map(
+              (e) => Center(
+                child: Container(
+                  width: 800,
+                  child: e,
+                ),
               ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class HeadingLineView extends StatelessWidget {
-  final HeadingLine content;
-  const HeadingLineView({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    final style = switch (content.level) {
-      1 => TextStyle(
-          fontFamily: "RobotoFlex",
-          fontSize: 36,
-          fontWeight: FontWeight.w400,
-          letterSpacing: -0.5,
-          fontVariations: fontVariations,
-        ),
-      2 => TextStyle(
-          fontFamily: "RobotoFlex",
-          fontSize: 24,
-          fontWeight: FontWeight.w400,
-          fontVariations: fontVariations,
-        ),
-      3 => TextStyle(
-          fontFamily: "RobotoFlex",
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          fontVariations: fontVariations,
-        ),
-      int() => TextStyle(),
-    };
-
-    return Container(
-      // padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: " ".padLeft(content.level + 1, '#'),
-              style: style.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(.5),
-              ),
-            ),
-            TextSpan(
-              text: content.text.trim(),
-              style: style,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SiteTitleView extends StatelessWidget {
-  final SiteTitle content;
-  const SiteTitleView({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Text(
-        content.text.trim(),
-        style: TextStyle(
-          fontFamily: "RobotoFlex",
-          fontSize: 40,
-          fontWeight: FontWeight.w300,
-          letterSpacing: -0.5,
-          fontVariations: fontVariations,
-        ),
+            )
+            .toList(),
       ),
     );
   }

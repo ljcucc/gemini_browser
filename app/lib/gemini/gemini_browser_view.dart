@@ -24,7 +24,7 @@ class GeminiBrowserView extends StatelessWidget {
         if (header?.isGemtext ?? false) {
           contentView = Center(
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 1000),
+              // constraints: const BoxConstraints(maxWidth: 1000),
               // padding: EdgeInsets.all(16),
               child: const GemtextView(),
             ),
@@ -63,7 +63,13 @@ class GeminiBrowserView extends StatelessWidget {
             color: Theme.of(context).colorScheme.surface,
             child: Column(
               children: [
-                Expanded(child: contentView),
+                Expanded(
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: contentView,
+                  ),
+                ),
               ],
             ),
           ),

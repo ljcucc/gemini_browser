@@ -2,17 +2,21 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gemini_browser/gemini/gemini_connection_provider.dart';
-import 'package:gemini_browser/gemini/gemtext/image_disp/image_disp_fullscreen_page.dart';
+import 'package:gemini_browser/gemini/elements/image_disp/image_disp_fullscreen_page.dart';
+import 'package:gemini_browser/providers/gemini_connection_provider.dart';
 import 'package:gemini_connect/gemini_connection.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LinkImageDispWidget extends StatefulWidget {
-  final String link;
+  final Uri uri;
   final Widget child;
-  const LinkImageDispWidget(
-      {super.key, required this.link, required this.child});
+
+  const LinkImageDispWidget({
+    super.key,
+    required this.uri,
+    required this.child,
+  });
 
   @override
   State<LinkImageDispWidget> createState() => _LinkImageDispWidgetState();
@@ -28,19 +32,15 @@ class _LinkImageDispWidgetState extends State<LinkImageDispWidget> {
   }
 
   _load() async {
+    print("loading!!!");
     setState(() {
       isLoading = true;
     });
     final gcp = Provider.of<GeminiConnectionProvider>(context, listen: false);
-    final baseUri = gcp.connection.uri;
-    final connection = GeminiConnection(resolver: (Uri url) {
-      launchUrl(url);
-    });
-    connection.uri = baseUri;
-    final url = connection.resolve(widget.link);
-    await connection.connect(url);
+    final connection = GeminiConnection();
+    await connection.connect(widget.uri);
     if (connection.header?.isGemtext ?? false) {
-      gcp.push(url);
+      gcp.push(widget.uri);
     } else {
       buffer = connection.body;
     }
@@ -67,7 +67,7 @@ class _LinkImageDispWidgetState extends State<LinkImageDispWidget> {
       color: Colors.transparent,
       child: Tooltip(
         waitDuration: Duration(milliseconds: 1500),
-        message: widget.link,
+        message: widget.uri.toString(),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

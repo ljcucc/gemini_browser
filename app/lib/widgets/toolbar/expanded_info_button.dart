@@ -36,7 +36,7 @@ class _ExpandedInfoButtonState extends State<ExpandedInfoButton> {
       menuChildren: [
         Container(
           width: 400,
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(48.0),
           child: SiteInfoWidget(),
         ),
       ],

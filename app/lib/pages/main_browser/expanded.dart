@@ -6,6 +6,7 @@ import 'package:gemini_browser/widgets/toolbar/address_bar.dart';
 import 'package:gemini_browser/widgets/toolbar/expanded_info_button.dart';
 import 'package:gemini_browser/widgets/toolbar/info_sheet.dart';
 import 'package:gemini_browser/widgets/toolbar/loading_indicator.dart';
+import 'package:gemini_browser/widgets/toolbar/more_option/more_option_menu_button.dart';
 import 'package:gemini_browser/widgets/toolbar/site_info.dart';
 import 'package:gemini_browser/widgets/toolbar/tabs_overview_icon.dart';
 import 'package:gemini_connect/gemini_connection.dart';
@@ -64,10 +65,7 @@ class TopNavigationBar extends StatelessWidget {
                 onPressed: () {},
               ),
               Gap(8),
-              IconButton(
-                icon: Icon(Icons.more_vert),
-                onPressed: () {},
-              ),
+              MoreOptionMenuButton(),
             ],
           ),
         ),
